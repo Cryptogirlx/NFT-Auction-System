@@ -18,103 +18,129 @@ import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
 import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
-export declare namespace IAuction {
-  export type AuctionStruct = {
-    id: BigNumberish;
-    owner: string;
-    nftContract: string;
-    nftId: BigNumberish;
-    startTime: BigNumberish;
-    endTime: BigNumberish;
-    reservePrice: BigNumberish;
-    currency: string;
-  };
-
-  export type AuctionStructOutput = [
-    BigNumber,
-    string,
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    string
-  ] & {
-    id: BigNumber;
-    owner: string;
-    nftContract: string;
-    nftId: BigNumber;
-    startTime: BigNumber;
-    endTime: BigNumber;
-    reservePrice: BigNumber;
-    currency: string;
-  };
-
+export declare namespace Auction {
   export type BidStruct = {
-    auctionId: BigNumberish;
+    auctionID: BigNumberish;
     bidder: string;
     amount: BigNumberish;
     timestamp: BigNumberish;
   };
 
   export type BidStructOutput = [BigNumber, string, BigNumber, BigNumber] & {
-    auctionId: BigNumber;
+    auctionID: BigNumber;
     bidder: string;
     amount: BigNumber;
     timestamp: BigNumber;
+  };
+
+  export type AuctionStruct = {
+    nftOwner: string;
+    nftContract: string;
+    tokenID: BigNumberish;
+    startTime: BigNumberish;
+    endTime: BigNumberish;
+    reservePrice: BigNumberish;
+    isActive: boolean;
+  };
+
+  export type AuctionStructOutput = [
+    string,
+    string,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    BigNumber,
+    boolean
+  ] & {
+    nftOwner: string;
+    nftContract: string;
+    tokenID: BigNumber;
+    startTime: BigNumber;
+    endTime: BigNumber;
+    reservePrice: BigNumber;
+    isActive: boolean;
   };
 }
 
 export interface AuctionInterface extends utils.Interface {
   contractName: "Auction";
   functions: {
-    "bid(uint256,uint256,uint256)": FunctionFragment;
+    "DAOWallet()": FunctionFragment;
+    "USDC()": FunctionFragment;
+    "auctionCount()": FunctionFragment;
+    "auctions(uint256)": FunctionFragment;
+    "bid((uint256,address,uint256,uint256))": FunctionFragment;
+    "bidderRefundBalance(address)": FunctionFragment;
+    "bids(uint256,address)": FunctionFragment;
     "cancelAuction(uint256)": FunctionFragment;
-    "claimFunds(address)": FunctionFragment;
-    "claimNft(uint256,address)": FunctionFragment;
-    "createAuction(address,uint256,uint256,uint256,uint256,address)": FunctionFragment;
+    "claimFunds(uint256,address)": FunctionFragment;
+    "claimNFT(uint256,address)": FunctionFragment;
+    "claimableSellerFunds(address)": FunctionFragment;
+    "claimed(uint256)": FunctionFragment;
+    "createAuction((address,address,uint256,uint256,uint256,uint256,bool))": FunctionFragment;
     "getAuctionDetails(uint256)": FunctionFragment;
-    "getAuctionStatus(uint256)": FunctionFragment;
     "getBidDetails(uint256,address)": FunctionFragment;
-    "getClaimableBalance(address,address)": FunctionFragment;
+    "getBidderRefundBalance(address)": FunctionFragment;
+    "getClaimableSellerFunds(address)": FunctionFragment;
     "getHighestBidder(uint256)": FunctionFragment;
-    "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
+    "isAuctionActive(uint256)": FunctionFragment;
+    "moveFundsOutOfContract(address,uint256,uint256)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
-    "resolveAuction(uint256)": FunctionFragment;
+    "setDAOWalletAddress(address)": FunctionFragment;
+    "setTreasuryAddress(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "treasuryAddress()": FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: "DAOWallet", values?: undefined): string;
+  encodeFunctionData(functionFragment: "USDC", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "auctionCount",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "auctions",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "bid",
-    values: [BigNumberish, BigNumberish, BigNumberish]
+    values: [Auction.BidStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bidderRefundBalance",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "bids",
+    values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
     functionFragment: "cancelAuction",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "claimFunds", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "claimNft",
+    functionFragment: "claimFunds",
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "createAuction",
-    values: [
-      string,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      string
-    ]
+    functionFragment: "claimNFT",
+    values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAuctionDetails",
+    functionFragment: "claimableSellerFunds",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "claimed",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAuctionStatus",
+    functionFragment: "createAuction",
+    values: [Auction.AuctionStruct]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAuctionDetails",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -122,16 +148,24 @@ export interface AuctionInterface extends utils.Interface {
     values: [BigNumberish, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "getClaimableBalance",
-    values: [string, string]
+    functionFragment: "getBidderRefundBalance",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getClaimableSellerFunds",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "getHighestBidder",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "onERC1155Received",
-    values: [string, string, BigNumberish, BigNumberish, BytesLike]
+    functionFragment: "isAuctionActive",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "moveFundsOutOfContract",
+    values: [string, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
@@ -139,21 +173,46 @@ export interface AuctionInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "resolveAuction",
-    values: [BigNumberish]
+    functionFragment: "setDAOWalletAddress",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setTreasuryAddress",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "treasuryAddress",
+    values?: undefined
+  ): string;
 
+  decodeFunctionResult(functionFragment: "DAOWallet", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "USDC", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "auctionCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "auctions", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "bid", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "bidderRefundBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "bids", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "cancelAuction",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "claimFunds", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "claimNft", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "claimNFT", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "claimableSellerFunds",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "claimed", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "createAuction",
     data: BytesLike
@@ -163,15 +222,15 @@ export interface AuctionInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAuctionStatus",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "getBidDetails",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getClaimableBalance",
+    functionFragment: "getBidderRefundBalance",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getClaimableSellerFunds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -179,7 +238,11 @@ export interface AuctionInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "onERC1155Received",
+    functionFragment: "isAuctionActive",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "moveFundsOutOfContract",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
@@ -188,45 +251,67 @@ export interface AuctionInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "resolveAuction",
+    functionFragment: "setDAOWalletAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setTreasuryAddress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "treasuryAddress",
+    data: BytesLike
+  ): Result;
 
   events: {
     "AuctionCancelled(uint256)": EventFragment;
-    "BalanceUpdated(address,address,uint256)": EventFragment;
+    "AuctionCreated(address,uint256,uint256,uint256,uint256)": EventFragment;
     "BidPlaced(uint256,uint256)": EventFragment;
-    "ClaimNFT(uint256,address,address,uint256)": EventFragment;
-    "NewAuction(uint256,tuple)": EventFragment;
+    "BidderRefundClaimed(address,uint256)": EventFragment;
+    "DAOWalletAddressSet(address)": EventFragment;
+    "NFTClaimedByOwner(uint256,address,uint256)": EventFragment;
+    "NFTClaimedByWinner(uint256,address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "SellerFundsClaimed(address,uint256)": EventFragment;
+    "TreasuryAddressSet(address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "AuctionCancelled"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BalanceUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "AuctionCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "BidPlaced"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "ClaimNFT"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewAuction"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BidderRefundClaimed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "DAOWalletAddressSet"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NFTClaimedByOwner"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NFTClaimedByWinner"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "SellerFundsClaimed"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TreasuryAddressSet"): EventFragment;
 }
 
 export type AuctionCancelledEvent = TypedEvent<
   [BigNumber],
-  { auctionId: BigNumber }
+  { auctionID: BigNumber }
 >;
 
 export type AuctionCancelledEventFilter =
   TypedEventFilter<AuctionCancelledEvent>;
 
-export type BalanceUpdatedEvent = TypedEvent<
-  [string, string, BigNumber],
-  { accountOf: string; tokenAddress: string; newBalance: BigNumber }
+export type AuctionCreatedEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber, BigNumber],
+  {
+    owner: string;
+    startTime: BigNumber;
+    endTime: BigNumber;
+    tokenID: BigNumber;
+    reservePrice: BigNumber;
+  }
 >;
 
-export type BalanceUpdatedEventFilter = TypedEventFilter<BalanceUpdatedEvent>;
+export type AuctionCreatedEventFilter = TypedEventFilter<AuctionCreatedEvent>;
 
 export type BidPlacedEvent = TypedEvent<
   [BigNumber, BigNumber],
@@ -235,19 +320,37 @@ export type BidPlacedEvent = TypedEvent<
 
 export type BidPlacedEventFilter = TypedEventFilter<BidPlacedEvent>;
 
-export type ClaimNFTEvent = TypedEvent<
-  [BigNumber, string, string, BigNumber],
-  { auctionId: BigNumber; winner: string; recipient: string; amount: BigNumber }
+export type BidderRefundClaimedEvent = TypedEvent<
+  [string, BigNumber],
+  { recipient: string; amount: BigNumber }
 >;
 
-export type ClaimNFTEventFilter = TypedEventFilter<ClaimNFTEvent>;
+export type BidderRefundClaimedEventFilter =
+  TypedEventFilter<BidderRefundClaimedEvent>;
 
-export type NewAuctionEvent = TypedEvent<
-  [BigNumber, IAuction.AuctionStructOutput],
-  { auctionId: BigNumber; newAuction: IAuction.AuctionStructOutput }
+export type DAOWalletAddressSetEvent = TypedEvent<
+  [string],
+  { walletAddress: string }
 >;
 
-export type NewAuctionEventFilter = TypedEventFilter<NewAuctionEvent>;
+export type DAOWalletAddressSetEventFilter =
+  TypedEventFilter<DAOWalletAddressSetEvent>;
+
+export type NFTClaimedByOwnerEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  { auctionID: BigNumber; recipient: string; tokenID: BigNumber }
+>;
+
+export type NFTClaimedByOwnerEventFilter =
+  TypedEventFilter<NFTClaimedByOwnerEvent>;
+
+export type NFTClaimedByWinnerEvent = TypedEvent<
+  [BigNumber, string, BigNumber],
+  { auctionID: BigNumber; recipient: string; tokenID: BigNumber }
+>;
+
+export type NFTClaimedByWinnerEventFilter =
+  TypedEventFilter<NFTClaimedByWinnerEvent>;
 
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
@@ -256,6 +359,22 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export type SellerFundsClaimedEvent = TypedEvent<
+  [string, BigNumber],
+  { recepient: string; amount: BigNumber }
+>;
+
+export type SellerFundsClaimedEventFilter =
+  TypedEventFilter<SellerFundsClaimedEvent>;
+
+export type TreasuryAddressSetEvent = TypedEvent<
+  [string],
+  { treasury: string }
+>;
+
+export type TreasuryAddressSetEventFilter =
+  TypedEventFilter<TreasuryAddressSetEvent>;
 
 export interface Auction extends BaseContract {
   contractName: "Auction";
@@ -285,74 +404,116 @@ export interface Auction extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
+    DAOWallet(overrides?: CallOverrides): Promise<[string]>;
+
+    USDC(overrides?: CallOverrides): Promise<[string]>;
+
+    auctionCount(overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    auctions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, string, BigNumber, BigNumber, BigNumber, BigNumber, boolean] & {
+        nftOwner: string;
+        nftContract: string;
+        tokenID: BigNumber;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        reservePrice: BigNumber;
+        isActive: boolean;
+      }
+    >;
+
     bid(
-      auctionId: BigNumberish,
-      amountFromBalance: BigNumberish,
-      externalFunds: BigNumberish,
+      _bid: Auction.BidStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    bidderRefundBalance(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    bids(
+      arg0: BigNumberish,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, string, BigNumber, BigNumber] & {
+        auctionID: BigNumber;
+        bidder: string;
+        amount: BigNumber;
+        timestamp: BigNumber;
+      }
+    >;
+
     cancelAuction(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     claimFunds(
-      tokenContract: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    claimNft(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       recipient: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    claimNFT(
+      auctionID: BigNumberish,
+      recipient: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    claimableSellerFunds(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    claimed(arg0: BigNumberish, overrides?: CallOverrides): Promise<[boolean]>;
+
     createAuction(
-      nftContract: string,
-      id: BigNumberish,
-      startTime: BigNumberish,
-      endTime: BigNumberish,
-      reservePrice: BigNumberish,
-      currency: string,
+      _auction: Auction.AuctionStruct,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     getAuctionDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[IAuction.AuctionStructOutput]>;
-
-    getAuctionStatus(
-      auctionId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<[Auction.AuctionStructOutput]>;
 
     getBidDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       bidder: string,
       overrides?: CallOverrides
-    ): Promise<[IAuction.BidStructOutput]>;
+    ): Promise<[Auction.BidStructOutput]>;
 
-    getClaimableBalance(
+    getBidderRefundBalance(
       account: string,
-      token: string,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
+    getClaimableSellerFunds(
+      account: string,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
     getHighestBidder(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
-    onERC1155Received(
-      operator: string,
-      from: string,
-      id: BigNumberish,
-      value: BigNumberish,
-      data: BytesLike,
+    isAuctionActive(
+      auctionID: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<[string]>;
+    ): Promise<[boolean]>;
+
+    moveFundsOutOfContract(
+      to: string,
+      amount: BigNumberish,
+      depositToAave: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -360,8 +521,13 @@ export interface Auction extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    resolveAuction(
-      auctionId: BigNumberish,
+    setDAOWalletAddress(
+      _DAOWallet: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setTreasuryAddress(
+      _treasuryAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -369,76 +535,120 @@ export interface Auction extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<[string]>;
   };
 
+  DAOWallet(overrides?: CallOverrides): Promise<string>;
+
+  USDC(overrides?: CallOverrides): Promise<string>;
+
+  auctionCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+  auctions(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<
+    [string, string, BigNumber, BigNumber, BigNumber, BigNumber, boolean] & {
+      nftOwner: string;
+      nftContract: string;
+      tokenID: BigNumber;
+      startTime: BigNumber;
+      endTime: BigNumber;
+      reservePrice: BigNumber;
+      isActive: boolean;
+    }
+  >;
+
   bid(
-    auctionId: BigNumberish,
-    amountFromBalance: BigNumberish,
-    externalFunds: BigNumberish,
+    _bid: Auction.BidStruct,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  bidderRefundBalance(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  bids(
+    arg0: BigNumberish,
+    arg1: string,
+    overrides?: CallOverrides
+  ): Promise<
+    [BigNumber, string, BigNumber, BigNumber] & {
+      auctionID: BigNumber;
+      bidder: string;
+      amount: BigNumber;
+      timestamp: BigNumber;
+    }
+  >;
+
   cancelAuction(
-    auctionId: BigNumberish,
+    auctionID: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   claimFunds(
-    tokenContract: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  claimNft(
-    auctionId: BigNumberish,
+    auctionID: BigNumberish,
     recipient: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  claimNFT(
+    auctionID: BigNumberish,
+    recipient: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  claimableSellerFunds(
+    arg0: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  claimed(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
+
   createAuction(
-    nftContract: string,
-    id: BigNumberish,
-    startTime: BigNumberish,
-    endTime: BigNumberish,
-    reservePrice: BigNumberish,
-    currency: string,
+    _auction: Auction.AuctionStruct,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   getAuctionDetails(
-    auctionId: BigNumberish,
+    auctionID: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<IAuction.AuctionStructOutput>;
-
-  getAuctionStatus(
-    auctionId: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<string>;
+  ): Promise<Auction.AuctionStructOutput>;
 
   getBidDetails(
-    auctionId: BigNumberish,
+    auctionID: BigNumberish,
     bidder: string,
     overrides?: CallOverrides
-  ): Promise<IAuction.BidStructOutput>;
+  ): Promise<Auction.BidStructOutput>;
 
-  getClaimableBalance(
+  getBidderRefundBalance(
     account: string,
-    token: string,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  getClaimableSellerFunds(
+    account: string,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
   getHighestBidder(
-    auctionId: BigNumberish,
+    auctionID: BigNumberish,
     overrides?: CallOverrides
   ): Promise<string>;
 
-  onERC1155Received(
-    operator: string,
-    from: string,
-    id: BigNumberish,
-    value: BigNumberish,
-    data: BytesLike,
+  isAuctionActive(
+    auctionID: BigNumberish,
     overrides?: CallOverrides
-  ): Promise<string>;
+  ): Promise<boolean>;
+
+  moveFundsOutOfContract(
+    to: string,
+    amount: BigNumberish,
+    depositToAave: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -446,8 +656,13 @@ export interface Auction extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  resolveAuction(
-    auctionId: BigNumberish,
+  setDAOWalletAddress(
+    _DAOWallet: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setTreasuryAddress(
+    _treasuryAddress: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -456,79 +671,128 @@ export interface Auction extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  treasuryAddress(overrides?: CallOverrides): Promise<string>;
+
   callStatic: {
-    bid(
-      auctionId: BigNumberish,
-      amountFromBalance: BigNumberish,
-      externalFunds: BigNumberish,
+    DAOWallet(overrides?: CallOverrides): Promise<string>;
+
+    USDC(overrides?: CallOverrides): Promise<string>;
+
+    auctionCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    auctions(
+      arg0: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<
+      [string, string, BigNumber, BigNumber, BigNumber, BigNumber, boolean] & {
+        nftOwner: string;
+        nftContract: string;
+        tokenID: BigNumber;
+        startTime: BigNumber;
+        endTime: BigNumber;
+        reservePrice: BigNumber;
+        isActive: boolean;
+      }
+    >;
+
+    bid(_bid: Auction.BidStruct, overrides?: CallOverrides): Promise<void>;
+
+    bidderRefundBalance(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    bids(
+      arg0: BigNumberish,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<
+      [BigNumber, string, BigNumber, BigNumber] & {
+        auctionID: BigNumber;
+        bidder: string;
+        amount: BigNumber;
+        timestamp: BigNumber;
+      }
+    >;
 
     cancelAuction(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    claimFunds(tokenContract: string, overrides?: CallOverrides): Promise<void>;
-
-    claimNft(
-      auctionId: BigNumberish,
+    claimFunds(
+      auctionID: BigNumberish,
       recipient: string,
       overrides?: CallOverrides
-    ): Promise<boolean>;
+    ): Promise<void>;
+
+    claimNFT(
+      auctionID: BigNumberish,
+      recipient: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    claimableSellerFunds(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    claimed(arg0: BigNumberish, overrides?: CallOverrides): Promise<boolean>;
 
     createAuction(
-      nftContract: string,
-      id: BigNumberish,
-      startTime: BigNumberish,
-      endTime: BigNumberish,
-      reservePrice: BigNumberish,
-      currency: string,
+      _auction: Auction.AuctionStruct,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getAuctionDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<IAuction.AuctionStructOutput>;
-
-    getAuctionStatus(
-      auctionId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<Auction.AuctionStructOutput>;
 
     getBidDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       bidder: string,
       overrides?: CallOverrides
-    ): Promise<IAuction.BidStructOutput>;
+    ): Promise<Auction.BidStructOutput>;
 
-    getClaimableBalance(
+    getBidderRefundBalance(
       account: string,
-      token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getClaimableSellerFunds(
+      account: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getHighestBidder(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
 
-    onERC1155Received(
-      operator: string,
-      from: string,
-      id: BigNumberish,
-      value: BigNumberish,
-      data: BytesLike,
+    isAuctionActive(
+      auctionID: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<string>;
+    ): Promise<boolean>;
+
+    moveFundsOutOfContract(
+      to: string,
+      amount: BigNumberish,
+      depositToAave: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    resolveAuction(
-      auctionId: BigNumberish,
+    setDAOWalletAddress(
+      _DAOWallet: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setTreasuryAddress(
+      _treasuryAddress: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -536,26 +800,28 @@ export interface Auction extends BaseContract {
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {
-    "AuctionCancelled(uint256)"(
-      auctionId?: BigNumberish | null
-    ): AuctionCancelledEventFilter;
-    AuctionCancelled(
-      auctionId?: BigNumberish | null
-    ): AuctionCancelledEventFilter;
+    "AuctionCancelled(uint256)"(auctionID?: null): AuctionCancelledEventFilter;
+    AuctionCancelled(auctionID?: null): AuctionCancelledEventFilter;
 
-    "BalanceUpdated(address,address,uint256)"(
-      accountOf?: string | null,
-      tokenAddress?: string | null,
-      newBalance?: BigNumberish | null
-    ): BalanceUpdatedEventFilter;
-    BalanceUpdated(
-      accountOf?: string | null,
-      tokenAddress?: string | null,
-      newBalance?: BigNumberish | null
-    ): BalanceUpdatedEventFilter;
+    "AuctionCreated(address,uint256,uint256,uint256,uint256)"(
+      owner?: null,
+      startTime?: null,
+      endTime?: null,
+      tokenID?: null,
+      reservePrice?: null
+    ): AuctionCreatedEventFilter;
+    AuctionCreated(
+      owner?: null,
+      startTime?: null,
+      endTime?: null,
+      tokenID?: null,
+      reservePrice?: null
+    ): AuctionCreatedEventFilter;
 
     "BidPlaced(uint256,uint256)"(
       auctionId?: null,
@@ -563,27 +829,41 @@ export interface Auction extends BaseContract {
     ): BidPlacedEventFilter;
     BidPlaced(auctionId?: null, amount?: null): BidPlacedEventFilter;
 
-    "ClaimNFT(uint256,address,address,uint256)"(
-      auctionId?: null,
-      winner?: null,
+    "BidderRefundClaimed(address,uint256)"(
       recipient?: null,
       amount?: null
-    ): ClaimNFTEventFilter;
-    ClaimNFT(
-      auctionId?: null,
-      winner?: null,
+    ): BidderRefundClaimedEventFilter;
+    BidderRefundClaimed(
       recipient?: null,
       amount?: null
-    ): ClaimNFTEventFilter;
+    ): BidderRefundClaimedEventFilter;
 
-    "NewAuction(uint256,tuple)"(
-      auctionId?: BigNumberish | null,
-      newAuction?: null
-    ): NewAuctionEventFilter;
-    NewAuction(
-      auctionId?: BigNumberish | null,
-      newAuction?: null
-    ): NewAuctionEventFilter;
+    "DAOWalletAddressSet(address)"(
+      walletAddress?: null
+    ): DAOWalletAddressSetEventFilter;
+    DAOWalletAddressSet(walletAddress?: null): DAOWalletAddressSetEventFilter;
+
+    "NFTClaimedByOwner(uint256,address,uint256)"(
+      auctionID?: null,
+      recipient?: null,
+      tokenID?: null
+    ): NFTClaimedByOwnerEventFilter;
+    NFTClaimedByOwner(
+      auctionID?: null,
+      recipient?: null,
+      tokenID?: null
+    ): NFTClaimedByOwnerEventFilter;
+
+    "NFTClaimedByWinner(uint256,address,uint256)"(
+      auctionID?: null,
+      recipient?: null,
+      tokenID?: null
+    ): NFTClaimedByWinnerEventFilter;
+    NFTClaimedByWinner(
+      auctionID?: null,
+      recipient?: null,
+      tokenID?: null
+    ): NFTClaimedByWinnerEventFilter;
 
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
@@ -593,76 +873,112 @@ export interface Auction extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
+
+    "SellerFundsClaimed(address,uint256)"(
+      recepient?: null,
+      amount?: null
+    ): SellerFundsClaimedEventFilter;
+    SellerFundsClaimed(
+      recepient?: null,
+      amount?: null
+    ): SellerFundsClaimedEventFilter;
+
+    "TreasuryAddressSet(address)"(
+      treasury?: null
+    ): TreasuryAddressSetEventFilter;
+    TreasuryAddressSet(treasury?: null): TreasuryAddressSetEventFilter;
   };
 
   estimateGas: {
+    DAOWallet(overrides?: CallOverrides): Promise<BigNumber>;
+
+    USDC(overrides?: CallOverrides): Promise<BigNumber>;
+
+    auctionCount(overrides?: CallOverrides): Promise<BigNumber>;
+
+    auctions(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
     bid(
-      auctionId: BigNumberish,
-      amountFromBalance: BigNumberish,
-      externalFunds: BigNumberish,
+      _bid: Auction.BidStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    bidderRefundBalance(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    bids(
+      arg0: BigNumberish,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     cancelAuction(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     claimFunds(
-      tokenContract: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    claimNft(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       recipient: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    claimNFT(
+      auctionID: BigNumberish,
+      recipient: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    claimableSellerFunds(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    claimed(arg0: BigNumberish, overrides?: CallOverrides): Promise<BigNumber>;
+
     createAuction(
-      nftContract: string,
-      id: BigNumberish,
-      startTime: BigNumberish,
-      endTime: BigNumberish,
-      reservePrice: BigNumberish,
-      currency: string,
+      _auction: Auction.AuctionStruct,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     getAuctionDetails(
-      auctionId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    getAuctionStatus(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getBidDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       bidder: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getClaimableBalance(
+    getBidderRefundBalance(
       account: string,
-      token: string,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getClaimableSellerFunds(
+      account: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getHighestBidder(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    onERC1155Received(
-      operator: string,
-      from: string,
-      id: BigNumberish,
-      value: BigNumberish,
-      data: BytesLike,
+    isAuctionActive(
+      auctionID: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    moveFundsOutOfContract(
+      to: string,
+      amount: BigNumberish,
+      depositToAave: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
@@ -671,8 +987,13 @@ export interface Auction extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    resolveAuction(
-      auctionId: BigNumberish,
+    setDAOWalletAddress(
+      _DAOWallet: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setTreasuryAddress(
+      _treasuryAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -680,76 +1001,106 @@ export interface Auction extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    DAOWallet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    USDC(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    auctionCount(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    auctions(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     bid(
-      auctionId: BigNumberish,
-      amountFromBalance: BigNumberish,
-      externalFunds: BigNumberish,
+      _bid: Auction.BidStruct,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    bidderRefundBalance(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    bids(
+      arg0: BigNumberish,
+      arg1: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     cancelAuction(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     claimFunds(
-      tokenContract: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    claimNft(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       recipient: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    claimNFT(
+      auctionID: BigNumberish,
+      recipient: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    claimableSellerFunds(
+      arg0: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    claimed(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     createAuction(
-      nftContract: string,
-      id: BigNumberish,
-      startTime: BigNumberish,
-      endTime: BigNumberish,
-      reservePrice: BigNumberish,
-      currency: string,
+      _auction: Auction.AuctionStruct,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     getAuctionDetails(
-      auctionId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    getAuctionStatus(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getBidDetails(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       bidder: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getClaimableBalance(
+    getBidderRefundBalance(
       account: string,
-      token: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getClaimableSellerFunds(
+      account: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     getHighestBidder(
-      auctionId: BigNumberish,
+      auctionID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    onERC1155Received(
-      operator: string,
-      from: string,
-      id: BigNumberish,
-      value: BigNumberish,
-      data: BytesLike,
+    isAuctionActive(
+      auctionID: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    moveFundsOutOfContract(
+      to: string,
+      amount: BigNumberish,
+      depositToAave: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -758,8 +1109,13 @@ export interface Auction extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    resolveAuction(
-      auctionId: BigNumberish,
+    setDAOWalletAddress(
+      _DAOWallet: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setTreasuryAddress(
+      _treasuryAddress: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -767,5 +1123,7 @@ export interface Auction extends BaseContract {
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    treasuryAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

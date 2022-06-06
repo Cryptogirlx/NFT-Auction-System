@@ -37,6 +37,7 @@ export type { MockERC20 } from "./MockERC20";
 export type { MockERC721 } from "./MockERC721";
 export type { Mock1155 } from "./Mock1155";
 export type { TestUser } from "./TestUser";
+export type { TestToken } from "./TestToken";
 
 export { Ownable__factory } from "./factories/Ownable__factory";
 export { IERC1271__factory } from "./factories/IERC1271__factory";
@@ -74,3 +75,4 @@ export { MockERC20__factory } from "./factories/MockERC20__factory";
 export { MockERC721__factory } from "./factories/MockERC721__factory";
 export { Mock1155__factory } from "./factories/Mock1155__factory";
 export { TestUser__factory } from "./factories/TestUser__factory";
+export { TestToken__factory } from "./factories/TestToken__factory";
